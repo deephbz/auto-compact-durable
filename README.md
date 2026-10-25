@@ -42,14 +42,45 @@ The package needs a pi-durable host. Install these peers at exactly `1.4.0`:
     and cut marks. One block is cut at 8000 tokens. An unknown label or a plan
     over the cap is rejected. `./keepset` exports the planner, budget, and fit
     check.
-- Fit: before returning a summary, the hook checks that the summary, kept tail,
-  and prompt overhead fit under the compaction trigger (`trigger`, else W).
-  If they do not fit, the hook falls back with a reason. The estimate uses
-  pi-ai's token estimator. A missing history or captured request also causes a
-  fallback rather than an assumed fit.
-- Cache reuse: `lastRequest(sessionId)` returns the last real provider request.
-  The planner appends one user message to that cached prefix. A restart reuses
-  a memoized plan; it does not send a second planning request.
+- Fit: the hook makes an estimated fit check before it returns a summary.
+  Durable's native placement owns the installed context. The summary, kept
+  tail, and prompt overhead must fit under the compaction trigger (`trigger`,
+  else W). Otherwise the hook falls back with
+  `the summary does not fit: ...`.
+  - Estimate: pi-ai's estimator on what pi-ai sends: 3.5 characters per token.
+    Thinking and tool-call arguments count as text. An image counts as 4800
+    characters.
+  - Prompt overhead: placement omits the system entries of the kept context
+    and writes one baseline of the current sections and tools. A section or
+    tool patch before the cut stays in the prompt. The hook replays every
+    system message of the history and captured request with pi-ai's
+    `getCurrentSystemMessage`, including any request-level system prompt and
+    tools, and takes the larger estimate. A plan saved before a restart keeps
+    its overhead as a floor. System entries in the kept tail count once as
+    overhead.
+  - Tail: the hook reads `history` again after the planner or summary model
+    answers, so output that arrived meanwhile counts. If `history` is absent or
+    fails, the hook falls back with
+    `the fit check cannot read the history: ...`. It never assumes an empty
+    tail.
+  - Race: the conversation can still grow between the fit check and durable's
+    placement. Placement owns that window.
+- Cache reuse: the planning request is the last real request of the provider
+  session plus one appended user message. `lastRequest(sessionId)` returns that
+  captured `Context` (AmPi's Cache Goblin wrapper captures it). The planner
+  sets `PLANNER_REQUEST` on its stream options with the prefix length. The
+  wrapper marks the prefix as usual and sends the appended message unmarked.
+  With no captured request, or a prefix that does not cover the replaced range,
+  the hook falls back with `no cache reuse: <gap>`.
+- Restart: the first run pins the method, keep cap, and fit limit in the task
+  memo. The plan memo pins the plan and planner model before validation. A
+  restarted node installs the memoized plan without a second planning request.
+  A new plan after restart has no captured request, so the hook falls back with
+  `no cache reuse: no request captured`.
+- Caveats: prefix identity holds only while payload modifiers (Cache Goblin
+  marks, other `onPayload` hooks) and cache TTL stay unchanged between the last
+  request and planner. Planner spend is not exactly-once. A crash after the
+  answer and before the memo write pays again.
 - `CompactRecord`: one receipt per compaction, including method, task ID,
   attempts, reason, trigger, sections, kept and dropped outputs, planner usage,
   cache facts, and any rejected plan.
