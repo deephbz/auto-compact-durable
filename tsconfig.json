@@ -7,7 +7,10 @@
     "skipLibCheck": true,
     "noEmit": true,
     "rewriteRelativeImportExtensions": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "paths": {
+      "@hypercarrier/auto-compact-durable/keepset": ["./src/keepset.ts"]
+    }
   },
   "include": ["src/**/*", "test/**/*"]
 }

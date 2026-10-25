@@ -1,6 +1,6 @@
 {
   "name": "@hypercarrier/auto-compact-durable",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "HyperCarrier Auto Compact on pi-durable: a working budget mapped onto durable compaction, and a structured summary with a Rarebit conversation record over the full durable history.",
   "repository": {
     "type": "git",
@@ -33,6 +33,11 @@
       "types": "./dist/budget.d.ts",
       "import": "./dist/budget.js",
       "default": "./dist/budget.js"
+    },
+    "./keepset": {
+      "types": "./dist/keepset.d.ts",
+      "import": "./dist/keepset.js",
+      "default": "./dist/keepset.js"
     }
   },
   "files": [

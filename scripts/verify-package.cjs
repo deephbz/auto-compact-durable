@@ -40,12 +40,19 @@ try {
   const probeSource = [
     `import { hcCompactExtension, workingBudget, type CompactRecord } from ${JSON.stringify(manifest.name)};`,
     `import { compactTrigger } from ${JSON.stringify(`${manifest.name}/budget`)};`,
+    `import { keepCap, PLAN_PROMPT_PREFIX } from ${JSON.stringify(`${manifest.name}/keepset`)};`,
     "const w: number = workingBudget(10);",
+    "const cap: number = keepCap(8_000);",
+    "const promptPrefix: string = PLAN_PROMPT_PREFIX;",
+    "// @ts-expect-error keepCap requires a number or undefined",
+    "const badCap = keepCap('8000');",
+    "// @ts-expect-error keepCap returns a number, not a string",
+    "const capString: string = keepCap(8_000);",
     "// @ts-expect-error workingBudget returns a number, not a string",
     "const notString: string = workingBudget(10);",
     "// @ts-expect-error CompactRecord.method is a closed union",
     "const method: CompactRecord['method'] = 'other';",
-    "void [w, notString, method, compactTrigger, hcCompactExtension];",
+    "void [w, notString, method, compactTrigger, hcCompactExtension, cap, promptPrefix, badCap, capString];",
     "",
   ].join("\n");
   fs.writeFileSync(path.join(probe, "probe.ts"), probeSource);

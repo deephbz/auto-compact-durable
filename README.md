@@ -27,13 +27,32 @@ The package needs a pi-durable host. Install these peers at exactly `1.4.0`:
   can use the same rule without loading pi-durable.
 - `compactionSettings(opts)`: the harness compaction settings. The verbatim
   keep defaults to min(20000, W/4) when a budget is set.
-- `hcCompactExtension({history, record})`: a `beforeCompact` hook that writes
-  three sections: the model's working-state summary, the Rarebit conversation
-  record (newest first, 12k-token cap, over the full durable history), and an
-  index of dropped tool results. If the model call fails, it records a
-  `native-fallback` and pi-durable writes its own summary.
-- `CompactRecord`: one receipt per compaction (method, reason, trigger,
-  sections).
+- `hcCompactExtension({history, record, method, lastRequest, workingBudget, trigger})`:
+  a `beforeCompact` hook. `method` returns `keepset` (default), `summary`, or
+  `native`. If the chosen method fails, the hook records a `native-fallback`
+  with the reason and pi-durable writes its own summary.
+  - `summary`: the model's working-state summary, the Rarebit conversation
+    record (newest first, 12k-token cap, over the full durable history), and an
+    index of dropped tool results.
+  - `keepset`: Pi's keepset. One planning request returns
+    `{summary, keep}`, where `keep` names tool outputs (`t1`, `t2`, ...) of the
+    replaced range. The summary holds the working-state summary, kept outputs
+    verbatim, the conversation record, and the dropped index. The keep cap is
+    min(20000, W/4). The cap counts installed text, including headers, fences,
+    and cut marks. One block is cut at 8000 tokens. An unknown label or a plan
+    over the cap is rejected. `./keepset` exports the planner, budget, and fit
+    check.
+- Fit: before returning a summary, the hook checks that the summary, kept tail,
+  and prompt overhead fit under the compaction trigger (`trigger`, else W).
+  If they do not fit, the hook falls back with a reason. The estimate uses
+  pi-ai's token estimator. A missing history or captured request also causes a
+  fallback rather than an assumed fit.
+- Cache reuse: `lastRequest(sessionId)` returns the last real provider request.
+  The planner appends one user message to that cached prefix. A restart reuses
+  a memoized plan; it does not send a second planning request.
+- `CompactRecord`: one receipt per compaction, including method, task ID,
+  attempts, reason, trigger, sections, kept and dropped outputs, planner usage,
+  cache facts, and any rejected plan.
 
 Not ported from the Pi extension: artifact handoff turns and input custody. A
 durable run never loses input during compaction.

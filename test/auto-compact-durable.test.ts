@@ -91,7 +91,7 @@ function fakeApi(reply?: () => unknown) {
 		conversationId: "c",
 		snapshot: async (doc: unknown) => (doc === AgentDoc ? { model: { provider: "p", modelId: "m" } } : { sessionId: "s" }),
 		models: {
-			getModel: () => ({ maxTokens: 4000 }),
+			getModel: () => ({ maxTokens: 4000, contextWindow: 128_000 }),
 			completeSimple: async () => reply?.() ?? { stopReason: "stop", content: [{ type: "text", text: "Goal: retry\nNext: test" }] },
 		},
 		// memo(name, context) reads; memo(name, candidate, context) stores.
@@ -105,7 +105,7 @@ const beforeCompact = (options: Parameters<typeof hcCompactExtension>[0]) => (hc
 test("the hook writes the HC summary with the full-history record and reports the method", async () => {
 	const records: CompactRecord[] = [];
 	const api = fakeApi();
-	const result = await beforeCompact({ history: async () => history, record: (_api, r) => void records.push(r) })(compaction, api, {});
+	const result = await beforeCompact({ method: () => "summary", history: async () => history, record: (_api, r) => void records.push(r) })(compaction, api, {});
 	assert.match(result.summary, /Goal: retry/);
 	// The record covers the replaced range of the full history: entry 5 is the first one kept verbatim.
 	assert.match(result.summary, /\[USER\]\nAdd a retry to the uploader/);
@@ -118,7 +118,7 @@ test("the hook writes the HC summary with the full-history record and reports th
 test("a failed model call falls back to native compaction and says why", async () => {
 	const records: CompactRecord[] = [];
 	const api = fakeApi(() => ({ stopReason: "error", errorMessage: "provider down", content: [] }));
-	const result = await beforeCompact({ record: (_api, r) => void records.push(r) })(compaction, api, {});
+	const result = await beforeCompact({ method: () => "summary", record: (_api, r) => void records.push(r) })(compaction, api, {});
 	assert.equal(result, undefined);
 	assert.equal(records[0]?.method, "native-fallback");
 	assert.equal(records[0]?.error, "provider down");
