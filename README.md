@@ -14,7 +14,7 @@ The package needs a pi-durable host. Install these peers at exactly `1.4.0`:
 `@earendil-works/pi-durable`, `@earendil-works/pi-ai`, and
 `@earendil-works/chord`. It depends on
 [`@hypercarrier/rarebit-durable`](https://www.npmjs.com/package/@hypercarrier/rarebit-durable)
-`0.1.0`. Node 22.19 or later.
+`0.1.1`. Node 22.19 or later.
 
 ## API
 
