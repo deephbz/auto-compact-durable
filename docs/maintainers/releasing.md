@@ -33,6 +33,6 @@ bytes.
 npm trusted publishing needs the package to exist first. Version 0.1.0 was
 therefore published by hand from a clean checkout of the `v0.1.0` tag, and it
 has no npm provenance attestation. Trusted publishing was configured
-afterwards. The tag-push workflow run for `v0.1.0` fails at `npm publish`
-(the version already exists), and its GitHub Release was created by hand from
-the release notes. Every later version publishes from CI with provenance.
+afterwards. The tag-push workflow run for `v0.1.0` fails at `npm publish`, because
+the version was published by hand before trusted publishing existed. Its GitHub
+Release was created by hand from the release notes. Every later version publishes from CI with provenance.
