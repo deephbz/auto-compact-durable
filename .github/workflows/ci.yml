@@ -1,0 +1,71 @@
+name: CI
+
+# Both jobs run in parallel for each Node version. A tree that already passed is
+# recorded by the `ci` gate and skipped on re-runs (merge push, release tag).
+# Require only the `ci` check on main.
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_call:
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: ${{ github.event_name == 'pull_request' && format('ci-{0}', github.ref) || format('ci-{0}', github.run_id) }}
+  cancel-in-progress: true
+
+jobs:
+  # Typecheck, then build and verify the package as a consumer sees it.
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      matrix:
+        node: [22.x, 24.x]
+    steps:
+      - uses: actions/checkout@v4
+      - id: prepare
+        uses: ./.github/actions/prepare
+        with:
+          node-version: ${{ matrix.node }}
+      - if: steps.prepare.outputs.verified != 'true'
+        run: |
+          npm run typecheck
+          npm run verify:package
+
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      matrix:
+        node: [22.x, 24.x]
+    steps:
+      - uses: actions/checkout@v4
+      - id: prepare
+        uses: ./.github/actions/prepare
+        with:
+          node-version: ${{ matrix.node }}
+      - if: steps.prepare.outputs.verified != 'true'
+        run: npm test
+
+  ci:
+    if: always()
+    needs: [check, test]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require every job
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') || contains(needs.*.result, 'skipped')
+        run: exit 1
+      - uses: actions/checkout@v4
+      - id: record
+        run: echo "name=$(.github/scripts/ci-verified.sh name)" >> "$GITHUB_OUTPUT"
+      - run: echo "${{ github.sha }} ${{ github.run_id }}" > ci-verified.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.record.outputs.name }}
+          path: ci-verified.txt
+          retention-days: 90
+          overwrite: true

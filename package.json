@@ -1,0 +1,68 @@
+{
+  "name": "@hypercarrier/auto-compact-durable",
+  "version": "0.1.0",
+  "description": "HyperCarrier Auto Compact on pi-durable: a working budget mapped onto durable compaction, and a structured summary with a Rarebit conversation record over the full durable history.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/deephbz/auto-compact-durable.git"
+  },
+  "homepage": "https://github.com/deephbz/auto-compact-durable#readme",
+  "bugs": {
+    "url": "https://github.com/deephbz/auto-compact-durable/issues"
+  },
+  "author": "deephbz",
+  "license": "MIT",
+  "keywords": [
+    "pi-durable",
+    "auto-compact",
+    "compaction",
+    "ai-agent",
+    "context-window"
+  ],
+  "type": "module",
+  "engines": {
+    "node": ">=22.19"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    },
+    "./budget": {
+      "types": "./dist/budget.d.ts",
+      "import": "./dist/budget.js",
+      "default": "./dist/budget.js"
+    }
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "node scripts/build.cjs",
+    "prepare": "npm run build",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test test/*.test.ts",
+    "verify:package": "npm run build && node scripts/verify-package.cjs"
+  },
+  "dependencies": {
+    "@hypercarrier/rarebit-durable": "0.1.0"
+  },
+  "peerDependencies": {
+    "@earendil-works/chord": "1.4.0",
+    "@earendil-works/pi-ai": "1.4.0",
+    "@earendil-works/pi-durable": "1.4.0"
+  },
+  "devDependencies": {
+    "@earendil-works/chord": "1.4.0",
+    "@earendil-works/pi-ai": "1.4.0",
+    "@earendil-works/pi-durable": "1.4.0",
+    "@types/node": "^25.3.0",
+    "typescript": "^5.9.3"
+  }
+}
