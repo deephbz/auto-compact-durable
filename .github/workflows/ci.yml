@@ -49,7 +49,7 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
       - if: steps.prepare.outputs.verified != 'true'
-        run: npm test
+        run: npm run build && npm test
 
   ci:
     if: always()
