@@ -1,6 +1,6 @@
 {
   "name": "@hypercarrier/auto-compact-durable",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "HyperCarrier Auto Compact on pi-durable: a working budget mapped onto durable compaction, and a structured summary with a Rarebit conversation record over the full durable history.",
   "repository": {
     "type": "git",
@@ -56,7 +56,7 @@
     "verify:package": "npm run build && node scripts/verify-package.cjs"
   },
   "dependencies": {
-    "@hypercarrier/rarebit-durable": "0.1.3"
+    "@hypercarrier/rarebit-durable": "0.1.4"
   },
   "peerDependencies": {
     "@earendil-works/chord": "1.6.0",
