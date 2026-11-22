@@ -59,14 +59,14 @@
     "@hypercarrier/rarebit-durable": "0.1.3"
   },
   "peerDependencies": {
-    "@earendil-works/chord": "1.5.0",
-    "@earendil-works/pi-ai": "1.5.0",
-    "@earendil-works/pi-durable": "1.5.0"
+    "@earendil-works/chord": "1.6.0",
+    "@earendil-works/pi-ai": "1.6.0",
+    "@earendil-works/pi-durable": "1.6.0"
   },
   "devDependencies": {
-    "@earendil-works/chord": "1.5.0",
-    "@earendil-works/pi-ai": "1.5.0",
-    "@earendil-works/pi-durable": "1.5.0",
+    "@earendil-works/chord": "1.6.0",
+    "@earendil-works/pi-ai": "1.6.0",
+    "@earendil-works/pi-durable": "1.6.0",
     "@types/node": "^25.3.0",
     "typescript": "^5.9.3"
   }
